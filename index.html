@@ -1,0 +1,28 @@
+<html>
+<head>
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.9.2/dist/ffmpeg.min.js"></script>
+</head>
+<body>
+<video id="output-video" controls></video><br/>
+<input type="file" id="uploader">
+<p id="message" >
+
+<script>
+const { createFFmpeg, fetchFile } = FFmpeg;
+const ffmpeg = createFFmpeg();
+
+const transcode = async ({ target: { files }  }) => {
+  const { name } = files[0];
+  await ffmpeg.load();
+  document.getElementById('message').innerHTML = 'Przetwarzanie';
+  ffmpeg.FS('writeFile', name, await fetchFile(files[0]));
+  await ffmpeg.run('-i', name,  'output.mp4');
+  const data = ffmpeg.FS('readFile', 'output.mp4');
+ 
+  const video = document.getElementById('output-video');
+  video.src = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+}
+document.getElementById('uploader').addEventListener('change', transcode);
+</script>
+</body>
+</html>
